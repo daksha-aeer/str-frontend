@@ -32,7 +32,7 @@ function App() {
   return (
     <>
       <h1>Near POW</h1>
-      {/* {selector !== undefined ? (
+      {selector !== undefined ? (
         <button
           onClick={() => {
             const modal = setupModal(selector, {
@@ -46,7 +46,7 @@ function App() {
         </button>
       ) : (
         <div>No selector</div>
-      )} */}
+      )}
     </>
   );
 }
