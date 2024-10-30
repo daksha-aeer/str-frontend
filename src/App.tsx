@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Account,
   setupWalletSelector,
   WalletSelector,
 } from "@near-wallet-selector/core";
@@ -11,7 +12,8 @@ import "./App.css";
 
 function App() {
   const [selector, setSelector] = useState<WalletSelector>();
-
+  const [account, setAccount] = useState<Account>();
+  console.log("hello");
   useEffect(() => {
     async function setupSelector() {
       try {
@@ -33,9 +35,27 @@ function App() {
     setupSelector();
   }, []);
 
+  useEffect(() => {
+    async function getWallet() {
+      console.log("wallet");
+      if (selector !== undefined) {
+        const wallet = await selector.wallet("my-near-wallet");
+        const accounts = await wallet.getAccounts();
+        const account = accounts.at(0);
+
+        if (account !== undefined) {
+          setAccount(account);
+        }
+        console.log(accounts);
+      }
+    }
+    getWallet();
+  }, [selector]);
+
   return (
     <>
       <h1>Near POW</h1>
+      {account && <div>{account.accountId}</div>}
       {selector !== undefined ? (
         <button
           onClick={() => {
