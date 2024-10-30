@@ -18,7 +18,11 @@ function App() {
         console.log("setting selector");
         const newSelector = await setupWalletSelector({
           network: "testnet",
-          modules: [setupMyNearWallet()],
+          modules: [
+            setupMyNearWallet({
+              walletUrl: "https://testnet.mynearwallet.com",
+            }),
+          ],
         });
         console.log("got selector", newSelector);
         setSelector(newSelector);
