@@ -1,35 +1,33 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import backImage from "./assets/pexels-photo-6402424.jpeg";
+import { useEffect, useState } from "react";
+import {
+  setupWalletSelector,
+  WalletSelector,
+} from "@near-wallet-selector/core";
+import { setupModal } from "@near-wallet-selector/modal-ui";
+import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
+import "@near-wallet-selector/modal-ui/styles.css";
+
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [selector, setSelector] = useState<WalletSelector>();
+
+  useEffect(() => {
+    async function setupSelector() {
+      console.log("setting selector");
+      const newSelector = await setupWalletSelector({
+        network: "testnet",
+        modules: [setupMyNearWallet()],
+      });
+      console.log("got selector", newSelector);
+      setSelector(newSelector);
+    }
+    setupSelector();
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <img src={backImage} className="background" />
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <button>Connect Wallet</button>
     </>
   );
 }
