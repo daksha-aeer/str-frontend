@@ -14,20 +14,39 @@ function App() {
 
   useEffect(() => {
     async function setupSelector() {
-      console.log("setting selector");
-      const newSelector = await setupWalletSelector({
-        network: "testnet",
-        modules: [setupMyNearWallet()],
-      });
-      console.log("got selector", newSelector);
-      setSelector(newSelector);
+      try {
+        console.log("setting selector");
+        const newSelector = await setupWalletSelector({
+          network: "testnet",
+          modules: [setupMyNearWallet()],
+        });
+        console.log("got selector", newSelector);
+        setSelector(newSelector);
+      } catch (error) {
+        console.log("selector failed", error);
+      }
     }
     setupSelector();
   }, []);
 
   return (
     <>
-      <button>Connect Wallet</button>
+      <h1>Near POW</h1>
+      {/* {selector !== undefined ? (
+        <button
+          onClick={() => {
+            const modal = setupModal(selector, {
+              contractId: "test.testnet",
+            });
+
+            modal.show();
+          }}
+        >
+          Connect Wallet
+        </button>
+      ) : (
+        <div>No selector</div>
+      )} */}
     </>
   );
 }
