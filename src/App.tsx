@@ -25,11 +25,11 @@ function App() {
   const [isMining, setIsMining] = useState<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [miningResults, setResults] = useState<MiningResult[]>([
-    // {
-    //   count: "20",
-    //   proof: "aehhrhsrhert4t3wy",
-    //   hash: "gweghwh",
-    // },
+    {
+      count: "91",
+      proof: "891ef73604cff2067acbeed9d21c4e01c95af232edc2703f5a8ecc50713ff5c4",
+      hash: "GF8F6ueNMR966hXkAa1UvoU98obXXYAb7757DEnk3Ecs",
+    },
   ]);
 
   // Setup selector
@@ -167,8 +167,6 @@ function App() {
         clearInterval(intervalRef.current);
       }
     };
-    // setInterval(mine, 5000);
-    // mine();
   }, [selector, account, isMining, miningResults]);
 
   const toLEBytes = (num: number) => {
@@ -183,29 +181,42 @@ function App() {
 
   return (
     <>
-      <h3>Stratum $STR: The NEAR native PoW token</h3>
+      <main>
+        <h3>Stratum: PoW token on NEAR</h3>
 
-      {account && <div>{account.accountId}</div>}
-      {account == undefined && selector !== undefined ? (
-        <button
-          onClick={() => {
-            const modal = setupModal(selector, {
-              contractId: "stratum-miner-v2.testnet",
-            });
-            modal.show();
-          }}
-        >
-          Connect Wallet
-        </button>
-      ) : (
-        <div></div>
-      )}
-      {account && (
-        <button onClick={() => setIsMining(!isMining)}>
-          {isMining ? "Stop Mining" : "Start Mining"}
-        </button>
-      )}
-      <MiningResultsList results={miningResults} />
+        <p>
+          Stratum is a cryptocurrency anyone can mine on their computer or
+          phone. Enabled by NEAR's powerful WASM runtime and Rust, we embedded a
+          proof of work algorithm within a smart contract. Anybody can call this
+          function with a valid Keccak proof to mine tokens. Stratum combines
+          the best of Bitcoin and NEAR's next generation blockchain-
+          decentralized and censorship resistant money combined with the power
+          of smart contracts.
+        </p>
+        {account == undefined && selector !== undefined ? (
+          <button
+            onClick={() => {
+              const modal = setupModal(selector, {
+                contractId: "stratum-miner-v2.testnet",
+              });
+              modal.show();
+            }}
+          >
+            Connect Wallet
+          </button>
+        ) : (
+          <div></div>
+        )}
+        <br />
+        {account && (
+          <button onClick={() => setIsMining(!isMining)}>
+            {isMining ? "Stop Mining" : "Start Mining"}
+          </button>
+        )}
+        <br />
+        <br />
+        <MiningResultsList results={miningResults} />
+      </main>
     </>
   );
 }
