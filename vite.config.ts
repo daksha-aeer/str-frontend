@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     nodePolyfills({
-      include: ["crypto", "buffer", "http", "http2", "https", "stream", "util"],
+      // include: ["crypto", "buffer", "http", "http2", "https", "stream", "util"],
       globals: {
         Buffer: true,
         global: true,
@@ -23,6 +23,11 @@ export default defineConfig({
       },
       // Enable esbuild polyfill plugins
       plugins: [],
+    },
+  },
+  resolve: {
+    alias: {
+      buffer: "buffer",
     },
   },
 });

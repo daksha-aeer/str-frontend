@@ -8,7 +8,8 @@ import { setupModal } from "@near-wallet-selector/modal-ui";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { providers } from "near-api-js";
-import keccak256 from "keccak256";
+// import keccak256 from "keccak256";
+import { keccak256 } from "js-sha3";
 import "./App.css";
 import { Buffer } from "buffer";
 import MiningResultsList from "./MiningResultsList";
@@ -20,6 +21,14 @@ export interface MiningResult {
   count: string;
   proof: string;
   hash: string;
+}
+function hexStringToByteArray(hexString: string): number[] {
+  const result: number[] = [];
+  for (let i = 0; i < hexString.length; i += 2) {
+    const byte = parseInt(hexString.slice(i, i + 2), 16);
+    result.push(byte);
+  }
+  return result;
 }
 
 const CONTRACT_ADDRESS = "stratum-miner-v2.testnet";
@@ -151,8 +160,7 @@ function App() {
 
         // 2. Calculate proof
         const counterBytes = toLEBytes(counter);
-        const proof = Array.from(keccak256(counterBytes));
-
+        const proof = hexStringToByteArray(keccak256(counterBytes));
         // 3. Send result
         const mineResult = await wallet.signAndSendTransaction({
           actions: [
