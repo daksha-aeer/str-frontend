@@ -13,6 +13,8 @@ import "./App.css";
 import { Buffer } from "buffer";
 import MiningResultsList from "./MiningResultsList";
 
+const sound = new Audio("metal-clang.mp3");
+
 export interface MiningResult {
   count: string;
   proof: string;
@@ -24,13 +26,7 @@ function App() {
   const [account, setAccount] = useState<Account>();
   const [isMining, setIsMining] = useState<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [miningResults, setResults] = useState<MiningResult[]>([
-    {
-      count: "91",
-      proof: "891ef73604cff2067acbeed9d21c4e01c95af232edc2703f5a8ecc50713ff5c4",
-      hash: "GF8F6ueNMR966hXkAa1UvoU98obXXYAb7757DEnk3Ecs",
-    },
-  ]);
+  const [miningResults, setResults] = useState<MiningResult[]>([]);
 
   // Setup selector
   useEffect(() => {
@@ -90,7 +86,7 @@ function App() {
         const registered = balance && balance.total !== "0";
 
         if (!registered) {
-          const registerResult = await wallet.signAndSendTransaction({
+          await wallet.signAndSendTransaction({
             actions: [
               {
                 type: "FunctionCall",
@@ -103,7 +99,6 @@ function App() {
               },
             ],
           });
-          console.log("register result", registerResult);
         }
 
         // 1. Get counter
@@ -118,7 +113,6 @@ function App() {
           .then((res) =>
             JSON.parse(Buffer.from((res as any).result).toString()),
           );
-        console.log("counter", counter);
 
         // 2. Calculate proof
         const counterBytes = toLEBytes(counter);
@@ -140,7 +134,7 @@ function App() {
             },
           ],
         });
-        console.log("mine result", mineResult);
+        sound.play();
 
         // 4. Store success hash in state
         let result: MiningResult = {
@@ -149,7 +143,6 @@ function App() {
           hash: mineResult.transaction.hash,
         };
         const newResults = [result, ...miningResults];
-        console.log("newResults", newResults);
         setResults(newResults);
       }
     }
@@ -220,7 +213,12 @@ function App() {
         )}
         <br />
         {account && (
-          <button onClick={() => setIsMining(!isMining)}>
+          <button
+            onClick={() => {
+              sound.play();
+              setIsMining(!isMining);
+            }}
+          >
             {isMining ? "Stop Mining" : "Start Mining"}
           </button>
         )}
