@@ -21,18 +21,39 @@ export interface MiningResult {
   hash: string;
 }
 
+const CONTRACT_ADDRESS = "stratum-miner-v2.testnet";
+
+const provider = new providers.JsonRpcProvider({
+  url: "https://rpc.testnet.near.org",
+});
+
 function App() {
   const [selector, setSelector] = useState<WalletSelector>();
   const [account, setAccount] = useState<Account>();
   const [isMining, setIsMining] = useState<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [miningResults, setResults] = useState<MiningResult[]>([]);
+  const [balance, setBalance] = useState<string>();
+
+  async function fetchBalance() {
+    const balanceResult = await provider.query({
+      request_type: "call_function",
+      account_id: CONTRACT_ADDRESS,
+      method_name: "ft_balance_of",
+      args_base64: btoa(JSON.stringify({ account_id: account.accountId })),
+      finality: "optimistic",
+    });
+
+    const balance = JSON.parse(
+      Buffer.from((balanceResult as any).result).toString(),
+    ).toString() as string;
+    setBalance(balance);
+  }
 
   // Setup selector
   useEffect(() => {
     async function setupSelector() {
       try {
-        console.log("Setting up wallet selector...");
         const newSelector = await setupWalletSelector({
           network: "testnet",
           modules: [
@@ -56,11 +77,20 @@ function App() {
         const wallet = await selector.wallet("my-near-wallet");
         const accounts = await wallet.getAccounts();
         const account = accounts[0];
-        if (account) setAccount(account);
+        if (account !== undefined) {
+          setAccount(account);
+        }
       }
     }
     getWallet();
   }, [selector]);
+
+  // Get initial balance
+  useEffect(() => {
+    if (account !== undefined) {
+      fetchBalance();
+    }
+  }, [account]);
 
   useEffect(() => {
     const provider = new providers.JsonRpcProvider({
@@ -74,7 +104,7 @@ function App() {
         // 0. Register if needed
         const registeredResult = await provider.query({
           request_type: "call_function",
-          account_id: "stratum-miner-v2.testnet",
+          account_id: CONTRACT_ADDRESS,
           method_name: "storage_balance_of",
           args_base64: btoa(JSON.stringify({ account_id: account.accountId })),
           finality: "optimistic",
@@ -105,7 +135,7 @@ function App() {
         const counter = await provider
           .query({
             request_type: "call_function",
-            account_id: "stratum-miner-v2.testnet",
+            account_id: CONTRACT_ADDRESS,
             method_name: "get_counter",
             args_base64: "",
             finality: "optimistic",
@@ -134,6 +164,9 @@ function App() {
             },
           ],
         });
+
+        await fetchBalance();
+
         sound.play();
 
         // 4. Store success hash in state
@@ -201,7 +234,7 @@ function App() {
           <button
             onClick={() => {
               const modal = setupModal(selector, {
-                contractId: "stratum-miner-v2.testnet",
+                contractId: CONTRACT_ADDRESS,
               });
               modal.show();
             }}
@@ -211,16 +244,24 @@ function App() {
         ) : (
           <div></div>
         )}
-        <br />
-        {account && (
-          <button
-            onClick={() => {
-              sound.play();
-              setIsMining(!isMining);
-            }}
-          >
-            {isMining ? "Stop Mining" : "Start Mining"}
-          </button>
+
+        {account !== undefined ? (
+          <>
+            <h2>
+              {account.accountId} balance: {balance ?? "0"} $STR
+            </h2>
+            <br />
+            <button
+              onClick={() => {
+                sound.play();
+                setIsMining(!isMining);
+              }}
+            >
+              {isMining ? "Stop Mining" : "Start Mining"}
+            </button>
+          </>
+        ) : (
+          <></>
         )}
         <br />
         <br />
