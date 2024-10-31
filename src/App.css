@@ -23,6 +23,16 @@
     width: 100%;
     background-repeat: no-repeat; */
 }
+
+.white-text {
+    color: white; /* Set text color to white */
+    text-shadow:
+        -0.5px -0.5px 0 #000,
+        0.5px -0.5px 0 #000,
+        -0.5px 0.5px 0 #000,
+        0.5px 0.5px 0 #000;
+}
+
 .logo {
     height: 6em;
     padding: 1.5em;

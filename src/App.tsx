@@ -212,11 +212,12 @@ function App() {
           style={{
             fontFamily: "Minecraft",
           }}
+          className="white-text"
         >
           Stratum: PoW token on NEAR
         </h1>
 
-        <p>
+        <p className="white-text">
           Stratum is a cryptocurrency anyone can mine on their computer or
           phone. Enabled by NEAR's powerful WASM runtime and Rust, we embedded a
           proof of work algorithm within a smart contract. Anybody can call this
@@ -247,7 +248,7 @@ function App() {
 
         {account !== undefined ? (
           <>
-            <h2>
+            <h2 className="white-text">
               {account.accountId} balance: {balance ?? "0"} $STR
             </h2>
             <br />
