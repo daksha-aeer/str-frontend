@@ -14,6 +14,7 @@ const MiningResultsList: React.FC<MiningResultsListProps> = ({ results }) => {
           style={{
             display: "flex",
             alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.7)", // Translucent background
             border: "1px solid #ccc",
             padding: "0.5rem",
             borderRadius: "6px",
@@ -37,7 +38,7 @@ const MiningResultsList: React.FC<MiningResultsListProps> = ({ results }) => {
                 rel="noopener noreferrer"
                 style={{ color: "#007bff", textDecoration: "none" }}
               >
-                {result.hash.slice(0, 4)}...{result.hash.slice(-3)}
+                {result.hash}
               </a>
             </span>
           </div>

@@ -181,8 +181,8 @@ function App() {
 
   return (
     <>
-      <main>
-        <h3>Stratum: PoW token on NEAR</h3>
+      <div className="main">
+        <h2>Stratum: PoW token on NEAR</h2>
 
         <p>
           Stratum is a cryptocurrency anyone can mine on their computer or
@@ -192,6 +192,11 @@ function App() {
           the best of Bitcoin and NEAR's next generation blockchain-
           decentralized and censorship resistant money combined with the power
           of smart contracts.
+          <br />
+          <br />
+          To run the demo simply press the mine button, create a testnet account
+          if needed and approve the required permissions. The app will start
+          mining tokens and display a list of successful transactions.
         </p>
         {account == undefined && selector !== undefined ? (
           <button
@@ -216,7 +221,7 @@ function App() {
         <br />
         <br />
         <MiningResultsList results={miningResults} />
-      </main>
+      </div>
     </>
   );
 }
