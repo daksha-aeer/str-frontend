@@ -182,7 +182,13 @@ function App() {
   return (
     <>
       <div className="main">
-        <h2>Stratum: PoW token on NEAR</h2>
+        <h1
+          style={{
+            fontFamily: "Minecraft",
+          }}
+        >
+          Stratum: PoW token on NEAR
+        </h1>
 
         <p>
           Stratum is a cryptocurrency anyone can mine on their computer or
