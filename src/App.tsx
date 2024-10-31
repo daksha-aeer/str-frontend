@@ -12,6 +12,7 @@ import keccak256 from "keccak256";
 import "./App.css";
 import { Buffer } from "buffer";
 import MiningResultsList from "./MiningResultsList";
+import { ClipLoader } from "react-spinners";
 
 const sound = new Audio("metal-clang.mp3");
 
@@ -251,7 +252,9 @@ function App() {
             <h2 className="white-text">
               {account.accountId} balance: {balance ?? "0"} $STR
             </h2>
+            <ClipLoader color="white" loading={isMining} />
             <br />
+
             <button
               onClick={() => {
                 sound.play();
@@ -266,6 +269,7 @@ function App() {
         )}
         <br />
         <br />
+
         <MiningResultsList results={miningResults} />
       </div>
     </>
