@@ -11,48 +11,26 @@ import { providers } from "near-api-js";
 import keccak256 from "keccak256";
 import "./App.css";
 import { Buffer } from "buffer";
+import MiningResultsList from "./MiningResultsList";
 
-const salt = 12345;
+export interface MiningResult {
+  count: string;
+  proof: string;
+  hash: string;
+}
 
 function App() {
   const [selector, setSelector] = useState<WalletSelector>();
   const [account, setAccount] = useState<Account>();
-  const [counter, setCounter] = useState(null);
-  const [isRegistered, setIsRegistered] = useState(false);
   const [isMining, setIsMining] = useState<boolean>(false);
-  // const [miningInterval, setMiningInterval] = useState<NodeJS.Timeout | null>(
-  //   null,
-  // );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // const toggleMining = async () => {
-  //   if (isMining) {
-  //     // Stop mining
-  //     console.log("Stopping mining...");
-  //     clearInterval(miningInterval!);
-  //     setMiningInterval(null);
-  //     setIsMining(false);
-  //   } else {
-  //     console.log("Starting mining...");
-  //     setIsMining(true);
-
-  //     // Ensure storage deposit before starting mining
-  //     const registered = await checkStorageDeposit();
-  //     if (!registered) {
-  //       console.log("User not registered for storage.");
-  //       setIsMining(false);
-  //       return;
-  //     }
-
-  //     // Start mining loop
-  //     const interval = setInterval(() => {
-  //       console.log("Submitting proof...");
-  //       startMining();
-  //     }, 5000);
-
-  //     setMiningInterval(interval);
-  //   }
-  // };
+  const [miningResults, setResults] = useState<MiningResult[]>([
+    // {
+    //   count: "20",
+    //   proof: "aehhrhsrhert4t3wy",
+    //   hash: "gweghwh",
+    // },
+  ]);
 
   // Setup selector
   useEffect(() => {
@@ -165,6 +143,14 @@ function App() {
         console.log("mine result", mineResult);
 
         // 4. Store success hash in state
+        let result: MiningResult = {
+          count: counter,
+          proof: toHexString(proof),
+          hash: mineResult.transaction.hash,
+        };
+        const newResults = [result, ...miningResults];
+        console.log("newResults", newResults);
+        setResults(newResults);
       }
     }
 
@@ -183,7 +169,7 @@ function App() {
     };
     // setInterval(mine, 5000);
     // mine();
-  }, [selector, account, isMining]);
+  }, [selector, account, isMining, miningResults]);
 
   const toLEBytes = (num: number) => {
     const buf = Buffer.alloc(8);
@@ -191,14 +177,13 @@ function App() {
     return buf;
   };
 
+  function toHexString(proof: number[]): string {
+    return proof.map((num) => num.toString(16).padStart(2, "0")).join("");
+  }
+
   return (
     <>
-      <h1>Near POW</h1>
-      {counter !== null ? (
-        <p>Counter: {counter}</p>
-      ) : (
-        <p>Fetching counter...</p>
-      )}
+      <h3>Stratum $STR: The NEAR native PoW token</h3>
 
       {account && <div>{account.accountId}</div>}
       {account == undefined && selector !== undefined ? (
@@ -220,6 +205,7 @@ function App() {
           {isMining ? "Stop Mining" : "Start Mining"}
         </button>
       )}
+      <MiningResultsList results={miningResults} />
     </>
   );
 }
