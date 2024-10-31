@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Account,
   setupWalletSelector,
@@ -20,9 +20,10 @@ function App() {
   const [counter, setCounter] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isMining, setIsMining] = useState<boolean>(false);
-  const [miningInterval, setMiningInterval] = useState<NodeJS.Timeout | null>(
-    null,
-  );
+  // const [miningInterval, setMiningInterval] = useState<NodeJS.Timeout | null>(
+  //   null,
+  // );
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // const toggleMining = async () => {
   //   if (isMining) {
@@ -93,87 +94,94 @@ function App() {
     });
 
     async function mine() {
-      try {
-        if (selector != undefined && account != undefined && isMining) {
-          const wallet = await selector.wallet("my-near-wallet");
+      if (selector != undefined && account != undefined) {
+        const wallet = await selector.wallet("my-near-wallet");
 
-          // 0. Register if needed
-          const registeredResult = await provider.query({
-            request_type: "call_function",
-            account_id: "stratum-miner-v2.testnet",
-            method_name: "storage_balance_of",
-            args_base64: btoa(
-              JSON.stringify({ account_id: account.accountId }),
-            ),
-            finality: "optimistic",
-          });
+        // 0. Register if needed
+        const registeredResult = await provider.query({
+          request_type: "call_function",
+          account_id: "stratum-miner-v2.testnet",
+          method_name: "storage_balance_of",
+          args_base64: btoa(JSON.stringify({ account_id: account.accountId })),
+          finality: "optimistic",
+        });
 
-          const balance = JSON.parse(
-            Buffer.from((registeredResult as any).result).toString(),
-          );
-          const registered = balance && balance.total !== "0";
+        const balance = JSON.parse(
+          Buffer.from((registeredResult as any).result).toString(),
+        );
+        const registered = balance && balance.total !== "0";
 
-          if (!registered) {
-            const registerResult = await wallet.signAndSendTransaction({
-              actions: [
-                {
-                  type: "FunctionCall",
-                  params: {
-                    methodName: "storage_deposit",
-                    args: {},
-                    gas: "30000000000000",
-                    deposit: "2350000000000000000000",
-                  },
-                },
-              ],
-            });
-            console.log("register result", registerResult);
-          }
-
-          // 1. Get counter
-          const counter = await provider
-            .query({
-              request_type: "call_function",
-              account_id: "stratum-miner-v2.testnet",
-              method_name: "get_counter",
-              args_base64: "",
-              finality: "optimistic",
-            })
-            .then((res) =>
-              JSON.parse(Buffer.from((res as any).result).toString()),
-            );
-          console.log("counter", counter);
-
-          // 2. Calculate proof
-          const counterBytes = toLEBytes(counter);
-          const proof = Array.from(keccak256(counterBytes));
-
-          // 3. Send result
-          const mineResult = await wallet.signAndSendTransaction({
+        if (!registered) {
+          const registerResult = await wallet.signAndSendTransaction({
             actions: [
               {
                 type: "FunctionCall",
                 params: {
-                  methodName: "submit_proof",
-                  args: {
-                    proof,
-                  },
+                  methodName: "storage_deposit",
+                  args: {},
                   gas: "30000000000000",
-                  deposit: "0",
+                  deposit: "2350000000000000000000",
                 },
               },
             ],
           });
-          console.log("mine result", mineResult);
-
-          // 4. Store success hash in state
+          console.log("register result", registerResult);
         }
-      } catch (error) {
-        console.log("error", error);
+
+        // 1. Get counter
+        const counter = await provider
+          .query({
+            request_type: "call_function",
+            account_id: "stratum-miner-v2.testnet",
+            method_name: "get_counter",
+            args_base64: "",
+            finality: "optimistic",
+          })
+          .then((res) =>
+            JSON.parse(Buffer.from((res as any).result).toString()),
+          );
+        console.log("counter", counter);
+
+        // 2. Calculate proof
+        const counterBytes = toLEBytes(counter);
+        const proof = Array.from(keccak256(counterBytes));
+
+        // 3. Send result
+        const mineResult = await wallet.signAndSendTransaction({
+          actions: [
+            {
+              type: "FunctionCall",
+              params: {
+                methodName: "submit_proof",
+                args: {
+                  proof,
+                },
+                gas: "30000000000000",
+                deposit: "0",
+              },
+            },
+          ],
+        });
+        console.log("mine result", mineResult);
+
+        // 4. Store success hash in state
       }
     }
 
-    setInterval(mine, 5000);
+    if (isMining) {
+      intervalRef.current = setInterval(mine, 5000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // Cleanup interval on component unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+    // setInterval(mine, 5000);
     // mine();
   }, [selector, account, isMining]);
 
