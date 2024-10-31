@@ -37,6 +37,10 @@ function App() {
   const [balance, setBalance] = useState<string>();
 
   async function fetchBalance() {
+    if (account == undefined) {
+      return;
+    }
+
     const balanceResult = await provider.query({
       request_type: "call_function",
       account_id: CONTRACT_ADDRESS,
@@ -174,7 +178,7 @@ function App() {
         let result: MiningResult = {
           count: counter,
           proof: toHexString(proof),
-          hash: mineResult.transaction.hash,
+          hash: (mineResult as any).transaction.hash,
         };
         const newResults = [result, ...miningResults];
         setResults(newResults);
